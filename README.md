@@ -1,4 +1,15 @@
-# GitHub Commit Summary Generator
+# GitSum
+
+Generate clean commit summaries from any GitHub repository.
+
+## Live Demo
+👉 https://mksalada.github.io/gitsum/
+
+---
+
+## Description
+
+GitHub Commit Summary Generator
 
 A **browser-based web app** that generates a Markdown commit summary for any GitHub repository.  
 Perfect for creating a **COMMITS.md** or **CHANGELOG.md** automatically.
@@ -18,7 +29,7 @@ Perfect for creating a **COMMITS.md** or **CHANGELOG.md** automatically.
 
 ## Usage
 
-1. Open the `commit_summary.html` file in your browser.  
+1. Open the `index.html` file in your browser.  
 2. Enter the GitHub repository in the format: `owner/repository` (e.g., `user/repo`).  
 3. Click **Generate Markdown**.  
 4. Preview your commit summary.  

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GitSum</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2rem; }
+  input, button, textarea, select {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+  textarea {
+    height: 400px;
+    white-space: pre;
+  }
+</style>
+</head>
+<body>
+
+<h1>GitSum</h1>
+
+<label for="repo">GitHub Repo (owner/repo):</label>
+<input type="text" id="repo" placeholder="e.g., username/project-name">
+
+<label for="branch">Branch:</label>
+<input type="text" id="branch" placeholder="default: main">
+
+<label for="format">Output Format:</label>
+<select id="format">
+  <option value="md">Markdown (.md)</option>
+  <option value="json">JSON (.json)</option>
+  <option value="txt">Text (.txt)</option>
+</select>
+
+<button id="generate">Generate</button>
+
+<h2>Preview:</h2>
+<textarea id="output" readonly></textarea>
+
+<button id="download">Download File</button>
+
+<script>
+async function fetchCommits(ownerRepo, branch, page=1, perPage=100) {
+    const url = `https://api.github.com/repos/${ownerRepo}/commits?sha=${branch}&per_page=${perPage}&page=${page}`;
+    const res = await fetch(url);
+    if (res.status === 403) {
+        throw new Error("Rate limit exceeded. Try again later.");
+    }
+    if (!res.ok) return [];
+    return await res.json();
+}
+
+async function fetchAllCommits(ownerRepo, branch) {
+    let allCommits = [];
+    let page = 1;
+    while (true) {
+        document.getElementById("output").value =
+            `Fetching page ${page}... (${allCommits.length} commits so far)`;
+        const commits = await fetchCommits(ownerRepo, branch, page);
+        if (commits.length === 0) break;
+        allCommits = allCommits.concat(commits);
+        if (commits.length < 100) break;
+        page++;
+    }
+    return allCommits;
+}
+
+function normalizeCommits(commits) {
+    return commits.map(c => ({
+        date: c.commit.author.date.slice(0,10),
+        sha: c.sha.slice(0,7),
+        author: c.commit.author.name,
+        message: c.commit.message.split("\n")[0],
+        url: c.html_url
+    }));
+}
+
+function toMarkdown(data) {
+    let md = "";
+    for (const c of data) {
+        md += `## ${c.date}
+- **${c.message}**
+- Author: ${c.author}
+- SHA: \`${c.sha}\`
+- URL: ${c.url}
+
+`;
+    }
+    return md;
+}
+
+function toJSON(data) {
+    return JSON.stringify(data, null, 2);
+}
+
+function toTXT(data) {
+    let txt = "";
+    for (const c of data) {
+        txt += `${c.date} | ${c.message}
+Author: ${c.author}
+SHA: ${c.sha}
+URL: ${c.url}
+------------------------------
+
+`;
+    }
+    return txt;
+}
+
+document.getElementById("generate").addEventListener("click", async () => {
+    const repo = document.getElementById("repo").value.trim();
+    const branch = document.getElementById("branch").value.trim() || "main";
+    const format = document.getElementById("format").value;
+
+    if (!repo) {
+        alert("Please enter a GitHub repo.");
+        return;
+    }
+
+    document.getElementById("output").value = "Fetching commits...";
+
+    try {
+        const commits = await fetchAllCommits(repo, branch);
+        const normalized = normalizeCommits(commits);
+
+        normalized.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        let output = "";
+
+        if (format === "json") output = toJSON(normalized);
+        if (format === "md") output = toMarkdown(normalized);
+        if (format === "txt") output = toTXT(normalized);
+
+        document.getElementById("output").value =
+            output || "No commits found.";
+
+    } catch (err) {
+        document.getElementById("output").value = "Error: " + err.message;
+    }
+});
+
+document.getElementById("download").addEventListener("click", () => {
+    const text = document.getElementById("output").value;
+    const format = document.getElementById("format").value;
+    const repo = document.getElementById("repo").value.trim() || "commits";
+
+    if (!text) return;
+
+    let extension = format;
+    let mime = "text/plain";
+
+    if (format === "md") mime = "text/markdown";
+    if (format === "json") mime = "application/json";
+
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${repo.replace("/", "_")}_COMMITS.${extension}`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
