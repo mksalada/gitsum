@@ -1,28 +1,59 @@
-export async function fetchJSON(url) {
-  const res = await fetch(url);
-  updateRateLimit(res);
-  if (!res.ok) throw new Error("API error");
-  return res.json();
-}
+import { loadBranches, getAllCommits } from "./api.js";
+import { setLoading, setError, setOutput, populateBranches } from "./ui.js";
+import { format } from "./formatter.js";
 
-export async function loadBranches(repo) {
-  const data = await fetchJSON(`https://api.github.com/repos/${repo}/branches`);
-  return data.map(b => b.name);
-}
+const repoInput = document.getElementById("repo");
+const branchSelect = document.getElementById("branch");
+const outputEl = document.getElementById("output");
+const formatSelect = document.getElementById("format");
 
-export async function fetchCommits(repo, branch, page = 1) {
-  return fetchJSON(
-    `https://api.github.com/repos/${repo}/commits?sha=${branch}&per_page=100&page=${page}`
-  );
-}
+// Theme toggle
+document.getElementById("themeToggle").onclick = () => {
+  const html = document.documentElement;
+  const dark = html.getAttribute("data-theme") === "dark";
+  html.setAttribute("data-theme", dark ? "light" : "dark");
+};
 
-export async function getAllCommits(repo, branch) {
-  let all = [], page = 1;
-  while (true) {
-    const data = await fetchCommits(repo, branch, page);
-    if (!data.length) break;
-    all = all.concat(data);
-    page++;
+// Load branches when repo input loses focus
+repoInput.addEventListener("blur", async () => {
+  const repo = repoInput.value.trim();
+  if (!repo) return;
+
+  try {
+    const branches = await loadBranches(repo);
+    populateBranches(branchSelect, branches);
+  } catch {
+    // silently ignore
   }
-  return all;
-}
+});
+
+// Generate
+document.getElementById("generate").onclick = async () => {
+  const repo = repoInput.value.trim();
+  const branch = branchSelect.value;
+  const type = formatSelect.value;
+
+  if (!repo) return;
+
+  setLoading(outputEl);
+
+  try {
+    const commits = await getAllCommits(repo, branch);
+    const result = format(commits, type);
+    setOutput(outputEl, result);
+  } catch (err) {
+    setError(outputEl, err.message);
+  }
+};
+
+// Download
+document.getElementById("download").onclick = () => {
+  const text = outputEl.innerText;
+  const type = formatSelect.value;
+
+  const blob = new Blob([text]);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `COMMITS.${type}`;
+  a.click();
+};
