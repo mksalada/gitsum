@@ -1,55 +1,80 @@
 # GitSum
 
-Generate clean commit summaries from any GitHub repository.
+![banner](./GitSum_banner.png)
 
-## Live Demo
-👉 https://mksalada.github.io/gitsum/
+**GitSum** is a lightweight, browser-based tool that transforms raw GitHub commit logs into readable summaries with support for multiple export formats.
 
----
+## 🚀 Features
 
-## Description
+- ✨ Generate clean, readable commit summaries
+- 📤 Export summaries as:
+    - `.json`
+    - `.md` (Markdown)
+    - `.txt`
+- ⚡ Runs entirely in the browser (no installation needed)
+- 🧩 Simple and intuitive interface
 
-GitHub Commit Summary Generator
+## 🖥️ Demo
 
-A **browser-based web app** that generates a Markdown commit summary for any GitHub repository.  
-Perfect for creating a **COMMITS.md** or **CHANGELOG.md** automatically.
+> Turn messy commit logs into clean summaries—and export them anywhere.
 
----
+➡️ https://mksalada.github.io/gitsum/
 
-## Features
+<!-- ## 📸 Preview
+![GitSum Preview](./preview.png) -->
 
-- Fetch **all commits** from the `main` branch (or any branch if modified).  
-- Extract **date, commit message, author, SHA, and commit URL**.  
-- Sort commits **newest to oldest**.  
-- Preview Markdown in-browser.  
-- Download the result as `COMMITS.md`.  
-- Fully client-side, **no server required**.
+## 🛠️ How to Use
 
----
+1. Paste your commit logs into the input field
+2. Click Generate Summary
+3. Review the output
+4. Export in your preferred format:
+    - JSON
+    - Markdown
+    - Text
 
-## Usage
+## 📂 Export Formats
 
-1. Open the `index.html` file in your browser.  
-2. Enter the GitHub repository in the format: `owner/repository` (e.g., `user/repo`).  
-3. Click **Generate Markdown**.  
-4. Preview your commit summary.  
-5. Click **Download COMMITS.md** to save it.
+- JSON (`.json`) → Structured data for apps/tools
+- Markdown (`.md`) → Perfect for README or documentation
+- Text (`.txt`) → Simple and portable
 
----
+## 🧪 Tech Stack
 
-## Markdown Format
+- HTML
+- CSS
+- JavaScript (Vanilla)
 
-```markdown
-## YYYY-MM-DD
-- **Commit message**
-- Author: user
-- SHA: `commitcode`
-- URL: https://github.com/user/repo/commit/commitcode
+# 📦 Installation
+
+No installation required. Just open the app in your browser.
+
+Or run locally:
+
+```bash
+git clone https://github.com/mksalada/gitsum.git
+cd gitsum
+open index.html
 ```
 
 ---
 
-## Installation
+## 🔮 Roadmap
 
-No installation required! Just open the HTML file in any modern browser.
+- 🎨 UI/UX improvements
+- 🌙 Dark mode
+- 📋 Copy to clipboard
+- 🔗 GitHub API integration (auto-fetch commits)
+- ⚙️ Custom summary formatting
 
+## 🤝 Contributing
+
+Contributions, issues, and suggestions are welcome!
+
+<!-- ## 📄 License
+
+MIT License -->
+
+## 💡 Author
+
+Made with ❤️ by @mksalada
