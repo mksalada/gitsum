@@ -49,7 +49,7 @@
 - CSS
 - JavaScript (Vanilla)
 
-# 📦 Installation
+## 📦 Installation
 
 No installation required. Just open the app in your browser.
 
