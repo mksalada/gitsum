@@ -12,19 +12,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Force Node.js 24
+        run: echo "FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true" >> $GITHUB_ENV
+
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set folder name
-        run: echo "FOLDER=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-
-      - name: Prepare files
+      - name: Set deploy folder
         run: |
-          mkdir -p dist/$FOLDER
-          cp -r ./* dist/$FOLDER
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "FOLDER=." >> $GITHUB_ENV
+          else
+            echo "FOLDER=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+
+      - name: Prepare deploy files
+        run: |
+          mkdir -p dist
+          if [ "$FOLDER" = "." ]; then
+            cp -r ./* dist/
+          else
+            mkdir -p dist/$FOLDER
+            cp -r ./* dist/$FOLDER
+          fi
           rm -rf dist/$FOLDER/.git
 
-      - name: Deploy
+      - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
