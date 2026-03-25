@@ -85,4 +85,55 @@ document.getElementById("download").onclick = () => {
   a.href = URL.createObjectURL(blob);
   a.download = `COMMITS.${type}`;
   a.click();
+};repoInput.addEventListener("blur", async () => {
+  const repo = repoInput.value.trim();
+  if (!repo) return;
+
+  try {
+    const branches = await loadBranches(repo, updateRateLimit);
+    populateBranches(branchSelect, branches);
+  } catch {
+    // ignore
+  }
+});
+
+// Generate
+document.getElementById("generate").onclick = async () => {
+  const repo = repoInput.value.trim();
+  const branch = branchSelect.value;
+  const type = formatSelect.value;
+
+  if (!repo) {
+    setError(outputEl, "Enter a repository first.");
+    return;
+  }
+
+  if (!branch) {
+    setError(outputEl, "Select a branch first.");
+    return;
+  }
+
+  setLoading(outputEl);
+
+  try {
+    const commits = await getAllCommits(repo, branch, updateRateLimit);
+    const result = format(commits, type);
+    setOutput(outputEl, result);
+  } catch (err) {
+    setError(outputEl, err.message);
+  }
+};
+
+// Download
+document.getElementById("download").onclick = () => {
+  const text = outputEl.innerText;
+  const type = formatSelect.value;
+
+  if (!text.trim()) return;
+
+  const blob = new Blob([text]);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `COMMITS.${type}`;
+  a.click();
 };
